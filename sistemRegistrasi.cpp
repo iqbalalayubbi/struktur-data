@@ -8,6 +8,7 @@ struct Mahasiswa{
     string nama;
     string npm;
     string jurusan;
+    string dosenWali;
     Mahasiswa *next;
 };
 
@@ -110,17 +111,21 @@ void registerMhs(){
     }else{
         string nama = "";
         string jurusan = "";
+        string dosenWali = "";
         cout << "Masukkan nama mahasiswa\t: ";
         cin.get();
         getline(cin, nama);
         cout << "Masukkan jurusan mahasiswa\t: ";
         getline(cin, jurusan);
+        cout << "Masukkan Dosen Wali mahasiswa\t: ";
+        getline(cin, dosenWali);
 
         createNPM();
         mhs = new Mahasiswa();
         mhs->nama = nama;
         mhs->npm = npm;
         mhs->jurusan = jurusan;
+        mhs->dosenWali = dosenWali;
         mhs->next = NULL;
 
         if (mhsEmpty()){
@@ -136,6 +141,7 @@ void registerMhs(){
         cout << "NPM\t: " << npm << endl;
         cout << "Nama\t: " << nama << endl;
         cout << "Jurusan\t: " << jurusan << endl;
+        cout << "Dosen Wali\t: " << dosenWali << endl;
         cout << "Nomor\t: " << totalMhs << endl;
     }
 }
@@ -151,6 +157,7 @@ void getAllMhs(){
             cout << "NPM\t: " << currMhs->npm << endl;
             cout << "Nama\t: " << currMhs->nama << endl;
             cout << "Jurusan\t: " << currMhs->jurusan << endl;
+            cout << "Dosen Wali\t: " << currMhs->dosenWali << endl;
             cout << endl;
             currMhs = currMhs->next;
         }
@@ -173,6 +180,179 @@ void getAllOrder(){
     }
 }
 
+void searchMhs(){
+    string npmVal = "";
+    cout << "Masukkan NPM mahasiswa : ";
+    cin >> npmVal;
+
+    int isFound = 0;
+
+    if (headMhs != NULL){
+        currMhs = headMhs;
+        while (currMhs != NULL && currMhs->npm != npmVal){
+            currMhs = currMhs->next;
+        }
+        if (currMhs == NULL){
+            cout << "data mahasiswa tidak ditemukan" << endl;
+        }else{
+            cout << "Data Mahasiswa" << endl;
+            cout << "NPM\t: " << currMhs->npm << endl;
+            cout << "Nama\t: " << currMhs->nama << endl;
+            cout << "Jurusan\t: " << currMhs->jurusan << endl;
+            cout << "Dosen Wali\t: " << currMhs->dosenWali << endl;
+        }
+
+    }else{
+        cout << "data mahasiswa masih kosong" << endl;
+    }
+}
+
+void getTotalMhs(){
+    int totalMhs = 0;
+    if (headMhs != NULL){
+        currMhs = headMhs;
+        while(currMhs != NULL){
+            totalMhs++;
+            currMhs = currMhs->next;
+        }
+        cout << "Jumlah Mahasiswa Terdaftar : " << totalMhs << endl;
+
+    }else{
+        cout << "data mahasiswa masih kosong" << endl;
+    }
+}
+
+int isMhs(string npmVal){
+    int isFound = 0;
+
+    if (headMhs != NULL){
+        currMhs = headMhs;
+        while (currMhs != NULL && currMhs->npm != npmVal){
+            currMhs = currMhs->next;
+        }
+        if (currMhs == NULL){
+            isFound = 0;
+        }else{
+            isFound = 1;
+        }
+    }
+    return isFound;
+}
+
+void getTotalOrder(){
+    int totalOrder = 0;
+
+    if (headOrder != NULL){
+        currOrder = headOrder;
+        while(currOrder != NULL){
+            totalOrder++;
+            currOrder = currOrder->next;
+        }
+        cout << "Jumlah Antrian saat ini : " << totalOrder << endl;
+
+    }else{
+        cout << "Antrian masih kosong" << endl;
+    }
+}
+
+void updateMhs(){
+    int updateOption;
+    string npmVal;
+    string newNama;
+    string newDosenWali;
+
+    cout << "Masukkan NPM mahasiswa : ";
+    cin.get();
+    getline(cin, npmVal);
+
+    if (headMhs != NULL){
+        if (isMhs(npmVal)){
+            cout << "Pilih Data yang ingin diubah" << endl;
+            cout << "1. Nama" << endl;
+            cout << "2. Dosen Wali" << endl;
+            cout << "Pilih sesuai dengan nomor : ";
+            cin >> updateOption;
+
+            currMhs = headMhs;
+            while (currMhs->npm != npmVal){
+                currMhs = currMhs->next;
+            }
+            if (updateOption == 1){
+                cout << "Masukkan nama baru : ";
+                cin.get();
+                getline(cin,newNama);
+                currMhs->nama = newNama;
+            }else if(updateOption == 2){
+                cout << "Masukkan Dosen Wali baru : ";
+                cin.get();
+                getline(cin,newDosenWali);
+                currMhs->dosenWali = newDosenWali; 
+            }else{
+                cout << "input tidak valid" << endl;
+            }
+            cout << "Data mahasiswa berhasil diubah" << endl;
+            cout << "NPM\t: " << currMhs->npm  << endl;
+            cout << "Nama\t: " << currMhs->nama  << endl;
+            cout << "Jurusan\t: " << currMhs->jurusan  << endl;
+            cout << "Dosen Wali\t: " << currMhs->dosenWali  << endl;
+
+        }else{
+            cout << "data mahasiswa tidak ditemukan" << endl;
+        }
+    }else{
+        cout << "data mahasiswa masih kosong" << endl;
+    }
+}
+
+void removeMhs(){
+    string npmVal;
+    cout << "Masukkan NPM mahasiswa : ";
+    cin.get();
+    getline(cin, npmVal);
+
+    if (headMhs != NULL){
+        currMhs = headMhs;
+        while(currMhs != NULL && currMhs->npm != npmVal){
+            currMhs = currMhs->next;
+        }
+        if (isMhs(npmVal)){
+            if (currMhs == headMhs){
+                // remove first
+                tempMhs = headMhs;
+                headMhs = headMhs->next;
+                cout << "mahasiswa dengan NPM " << tempMhs->npm  << " telah dihapus" << endl;
+                delete tempMhs;
+            }else if(currMhs == tailMhs){
+                // remove last
+                tempMhs = tailMhs;
+                currMhs = headMhs;
+                while (currMhs->next != tempMhs){
+                    currMhs = currMhs->next;
+                }
+                currMhs->next = NULL;
+                tailMhs = currMhs;
+                cout << "mahasiswa dengan NPM " << tempMhs->npm  << " telah dihapus" << endl;
+                delete tempMhs;
+            }else{
+                currMhs = headMhs;
+                while (currMhs->next->npm != npmVal){
+                    currMhs = currMhs->next;
+                }
+                tempMhs = currMhs->next;
+                currMhs->next = tempMhs->next;
+                cout << "mahasiswa dengan NPM " << tempMhs->npm  << " telah dihapus" << endl;
+                delete tempMhs;
+            }
+        }else{
+            cout << "data mahasiswa tidak ditemukan" << endl;
+        }
+        
+    }else{
+        cout << "data mahasiswa masih kosong" << endl;
+    }
+
+}
+
 void displayMenu(){
     cout << endl;
     cout << "Sistem Registrasi Mahasiswa" << endl;
@@ -180,6 +360,11 @@ void displayMenu(){
     cout << "2. Daftar Mahasiswa" << endl;
     cout << "3. Lihat daftar mahasiswa" << endl;
     cout << "4. Lihat daftar antrian" << endl;
+    cout << "5. Cari Mahasiswa" << endl;
+    cout << "6. Jumlah Mahasiswa Terdaftar" << endl;
+    cout << "7. Jumlah Antrian" << endl;
+    cout << "8. Ubah Data Mahasiwa" << endl;
+    cout << "9. Hapus Data Mahasiwa" << endl;
     cout << "Pilih menu (sesuai nomor di atas) : ";
     cin >> choice;
     cout << endl;
@@ -194,20 +379,48 @@ int main(){
     // npm digenerate bagian 3 digit belakang sesuai dengan antrian
     // setelah melakukan pengecekan berkas maka data user akan dimasukkan kedalam database
     // data dimasukkan dalam bentuk linked list
+
+    // todo
+    // searching mahasiswa (done)
+    // menghitung jumlah mahasiswa (done)
+    // menghitung total antrian (done)
+
     displayMenu();
 
     while (choice != 0)
     {
-        if (choice == 1){
-            insertOrder();
-        }else if(choice == 2){
-            registerMhs();
-        }else if(choice == 3){
-            getAllMhs();
-        }else if(choice == 4){
-            getAllOrder();
-        }else{
-            cout << "Menu pilihan tidak tersedia" << endl;
+        switch (choice)
+        {
+            case 1:
+                insertOrder();
+                break;
+            case 2:
+                registerMhs();
+                break;
+            case 3:
+                getAllMhs();
+                break;
+            case 4:
+                getAllOrder();
+                break;
+            case 5:
+                searchMhs();
+                break;
+            case 6:
+                getTotalMhs();
+                break;
+            case 7:
+                getTotalOrder();
+                break;
+            case 8:
+                updateMhs();
+                break;
+            case 9:
+                removeMhs();
+                break;
+            default:
+                cout << "Menu pilihan tidak tersedia" << endl;
+                break;
         }
 
         displayMenu();
