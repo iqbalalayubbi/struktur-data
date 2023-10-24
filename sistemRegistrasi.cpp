@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 using namespace std;
-
 
 struct Mahasiswa{
     string nama;
@@ -22,30 +22,17 @@ OrderMhs *headOrder, *tailOrder, *tempOrder, *currOrder, *order;
 
 int totalMhs = 0;
 int orderTotal = 0;
+
 string npm = "";
 
 int choice = 0;
 
 void displayTitle(){
-    // cout << " _____            _     _                 _ " << endl;
-    // cout << "|  __ |          (_)   | |               (_)" << endl;
-    // cout << "| |__) |___  __ _ _ ___| |_ _ __ __ _ ___ _ " << endl;
-    // cout << "|  _  // _ |/ _` | / __| __| '__/ _` / __| |" << endl;
-    // cout << "| | | |  __| (_| | |__ | |_| | | (_| |__ | |" << endl;
-    // cout << "|_|  |_|___||__, |_|___/|__|_|  |__,_|___|_|" << endl;
-    // cout << "             __/ |                          " << endl;
-    // cout << "            |___/                           " << endl;
-
     cout << " ___          _    _               _ " << endl;
     cout << "| _ |___ __ _(_)__| |_ _ _ __ _ __(_)" << endl;
     cout << "|   / -_/ _` | (_-|  _| '_/ _` (_-| |" << endl;
     cout << "|_|_|___|__, |_/__/|__|_| |__,_/__|_|" << endl;
-    cout << "        |___/                        " << endl;
-
-    // cout << " _   _ ___ _  _ " << endl;
-    // cout << "| | | | _ | || |" << endl;
-    // cout << "| |_| |  _| .` |" << endl;
-    // cout << " |___/|_| |_||_|" << endl;                        
+    cout << "        |___/                        " << endl;                     
 
     cout << endl ;
 }
@@ -77,7 +64,6 @@ void insertOrder(){
         headOrder->next = NULL;
         tailOrder = headOrder;
     }else{
-        // push queue (insert last)
         orderTotal++;
         order = new OrderMhs;
         order->number = orderTotal;
@@ -146,22 +132,31 @@ void registerMhs(){
     }
 }
 
+void createTable(string tableName){
+    const int textLength = 20;
+
+    if (tableName == "mahasiswa"){
+        currMhs = headMhs;
+
+        cout << left << setw(textLength) << "NPM" << left << setw(textLength) << "Nama" << left<< setw(textLength)<< "Jurusan" << left << setw(textLength) << "Dosen Wali" << endl;  
+        cout << left << setw(80) << "--------------------------------------------------------------------------------" << endl;  
+        while (currMhs != NULL)
+        {
+            cout    << left << setw(textLength) << currMhs->npm
+                    << left << setw(textLength) << currMhs->nama
+                    << left << setw(textLength) << currMhs->jurusan
+                    << left << setw(textLength) << currMhs->dosenWali
+                    << endl;
+            currMhs = currMhs->next;
+        }
+    }
+}
+
 void getAllMhs(){
     if (mhsEmpty()){
         cout << "Data mahasiswa masih kosong" << endl;
     }else{
-        currMhs = headMhs;
-        cout << "Daftar mahasiswa yang telah terdaftar" << endl;
-        while (currMhs != NULL)
-        {
-            cout << "NPM\t: " << currMhs->npm << endl;
-            cout << "Nama\t: " << currMhs->nama << endl;
-            cout << "Jurusan\t: " << currMhs->jurusan << endl;
-            cout << "Dosen Wali\t: " << currMhs->dosenWali << endl;
-            cout << endl;
-            currMhs = currMhs->next;
-        }
-        
+        createTable("mahasiswa");      
     }
 }
 
@@ -370,21 +365,8 @@ void displayMenu(){
     cout << endl;
 }
 
-int main(){       
-    displayTitle();     
-    // sistem antrian registrasi di UPN
-    // user akan mengambil antrian
-    // nomor antrian akan bertambah setiap ada mahasiswa yang daftar
-    // terdapat pilihan daftarkan mahasiswa
-    // npm digenerate bagian 3 digit belakang sesuai dengan antrian
-    // setelah melakukan pengecekan berkas maka data user akan dimasukkan kedalam database
-    // data dimasukkan dalam bentuk linked list
-
-    // todo
-    // searching mahasiswa (done)
-    // menghitung jumlah mahasiswa (done)
-    // menghitung total antrian (done)
-
+void runningApp(){
+    displayTitle();
     displayMenu();
 
     while (choice != 0)
@@ -427,5 +409,61 @@ int main(){
     }
 
     cout << "Input tidak valid" << endl;
+}
+
+int main(){     
+    runningApp();
     return 0;
 }
+
+
+
+
+
+
+// void testingAplikasi(){
+//     const int totalData = 3;
+//     struct AllMahasiswa{
+//         string nama;
+//         string jurusan;
+//         string dosenWali;
+//     };
+//     AllMahasiswa mahasiswa[totalData] = {
+//         {"iqbal al-ayyubi", "informatika", "hendra"},
+//         {"mohammad hafiz", "informatika", "budi"},
+//         {"haikal alif", "informatika", "samsul"},
+//     };
+
+//     for(int i=0; i<totalData; i++){
+//         insertOrder();
+//         cout << endl;
+//         registerMhs(mahasiswa[i].nama, mahasiswa[i].jurusan, mahasiswa[i].dosenWali);
+//         cout << endl;
+//     }
+//     getAllMhs();
+//     cout << endl;
+//     getAllOrder();
+//     cout << endl;
+
+//     // jika npm ada
+//     searchMhs("22081010001");
+//     cout << endl;
+//     // jika npm tidak ada
+//     searchMhs("2208101000100");
+//     cout << endl;
+
+//     // cek jumlah mahasiswa
+//     getTotalMhs();
+//     cout << endl;
+//     // cek jumlah antrian
+//     getTotalOrder();
+//     cout << endl;
+    
+//     // ubah data
+
+//     // hapus data jika ada
+//     removeMhs("22081010001");
+//     // hapus data jika tidak ada
+//     removeMhs("220810100010");
+
+// }
