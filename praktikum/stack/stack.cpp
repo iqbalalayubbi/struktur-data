@@ -26,8 +26,8 @@ void pushBook(string book){
 
 void popBook(){
     if (!isEmpty()){
-        top--;
         cout << "Buku " << books[top] << " berhasil dihapus" << endl;
+        top--;
     }else{
         cout << "Belum ada buku yang dimasukkan" << endl;
     }
