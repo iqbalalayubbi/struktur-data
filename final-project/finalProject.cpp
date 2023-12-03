@@ -12,6 +12,7 @@ struct Mahasiswa{
 };
 
 Mahasiswa *rootMhs, *newMhs;
+int choice;
 
 Mahasiswa *createTree(int npm, string nama){
     newMhs = new Mahasiswa();
@@ -93,7 +94,6 @@ Mahasiswa *insertMahasiswa(int npm, string nama, Mahasiswa *curr){
 void inOrder(Mahasiswa *curr){
     if (curr != NULL){
         inOrder(curr->left);
-        cout << "Data Mahasiswa" << endl;
         cout << "Nama : " << curr->nama << endl;
         cout << "NPM : " << curr->npm << endl;
         inOrder(curr->right);
@@ -111,19 +111,21 @@ Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
     else if (npm > curr->npm)
         curr->right = deleteMahasiswa(npm, curr->right);
     else {
-        Mahasiswa *temp = curr;
         // remove leaf node
         if (curr->left == NULL && curr->right == NULL) {
+            cout << "Mahasiswa dengan NPM " << curr->npm << " Berhasil dihapus" << endl;
             delete curr;
             return NULL;
         }
         if (curr->left == NULL) {
             Mahasiswa* childMhs = curr->right;
+            cout << "Mahasiswa dengan NPM " << curr->npm << " Berhasil dihapus" << endl;
             delete curr;
             return childMhs;
         }
         else if (curr->right == NULL) {
             Mahasiswa* childMhs = curr->left;
+            cout << "Mahasiswa dengan NPM " << curr->npm << " Berhasil dihapus" << endl;
             delete curr;
             return childMhs;
         }
@@ -137,7 +139,6 @@ Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
             curr->left = deleteMahasiswa(childMhs->npm, curr->left);
         }
 
-        cout << "Mahasiswa dengan NPM " << temp->npm << " Berhasil dihapus" << endl;
     }
 
     int balanceFactor = getBalanceFactor(curr);
@@ -186,46 +187,80 @@ void searchMahasiswa(int npm, Mahasiswa *curr){
     }
 }
 
+void displayMenu(){
+    cout << endl;
+    cout << "Sistem Pendaftaran Mahasiswa" << endl;
+    cout << "1. Daftar Mahasiswa" << endl;
+    cout << "2. Lihat daftar mahasiswa" << endl;
+    cout << "3. Cari Mahasiswa" << endl;
+    cout << "4. Hapus Data Mahasiwa" << endl;
+    cout << "Pilih menu (sesuai nomor di atas) : ";
+    cin >> choice;
+    cout << endl;
+}
+
+void displayTitle(){
+    cout << "   _________   ____.____      ___________________________________________" << endl;
+    cout << "  /  _  \\   \\ /   /|    |     \\__    ___/\\______   \\_   _____/\\_   _____/" << endl;
+    cout << " /  /_\\  \\   Y   / |    |       |    |    |       _/|    __)_  |    __)_ " << endl;
+    cout << "/    |    \\     /  |    |___    |    |    |    |   \\|        \\ |        \\" << endl;
+    cout << "\\____|__  /\\___/   |_______ \\   |____|    |____|_  /_______  //_______  /" << endl;
+    cout << "        \\/                 \\/                    \\/        \\/         \\/ " << endl;
+    cout << endl;
+}
+
 int main(){
-    rootMhs = insertMahasiswa(217, "iqbal", rootMhs);
-    rootMhs = insertMahasiswa(206, "haikal", rootMhs);
-    rootMhs = insertMahasiswa(205, "hafiz", rootMhs);
-    rootMhs = insertMahasiswa(204, "ryan", rootMhs);
-    rootMhs = insertMahasiswa(203, "ibnu", rootMhs);
-    rootMhs = insertMahasiswa(202, "rama", rootMhs);
-    searchMahasiswa(205, rootMhs);
-    rootMhs = deleteMahasiswa(217, rootMhs);
-    inOrder(rootMhs);
+    string nama;
+    int npm;
 
+    displayTitle();
+    displayMenu();
 
-    // cout << rootMhs->npm << endl; 
-    // cout << rootMhs->left->npm << endl; 
-    // cout << rootMhs->left->left->npm << endl; 
+    while (choice != 0)
+    {
+        switch (choice)
+        {
+            case 1:
+                cout << "Masukkan Data Mahasiswa" << endl;
+                cout << "Nama \t: ";
+                cin.get();
+                getline(cin, nama);
+                cout << "NPM (3 digit terakhir)\t: ";
+                cin >> npm;
+                rootMhs = insertMahasiswa(npm, nama, rootMhs);
+                break;
+            case 2:
+                cout << "Daftar semua mahasiswa" << endl;
+                inOrder(rootMhs);
+                break;
+            case 3:
+                cout << "Masukkan NPM \t: ";
+                cin >> npm;
+                searchMahasiswa(npm, rootMhs);
+                break;
+            case 4:
+                cout << "Masukkan NPM \t: ";
+                cin >> npm;
+                rootMhs = deleteMahasiswa(npm, rootMhs);
+                break;
+            default:
+                cout << "Menu pilihan tidak tersedia" << endl;
+                break;
+        }
+
+        displayMenu();
+    } 
     return 0;
     // commmand execute
     // g++ finalProject.cpp -o finalProject && .\finalProject
 }
 
-
-// void insertMahasiswa(int npm, string nama){
-//     if (rootMhs == NULL) createTree(npm, nama);
-//     else{
-//         newMhs = new Mahasiswa();
-//         newMhs->npm = npm;
-//         newMhs->nama = nama;
-//         newMhs->left = NULL;
-//         newMhs->right = NULL;
-
-//         curr = rootMhs;
- 
-//         while(curr != NULL){
-//             parent = curr;
-//             if (npm < curr->npm) curr = curr->left;  
-//             else curr = curr->right;
-//             parent->height++;
-//         }
-
-//         if (npm < parent->npm) parent->left = newMhs;
-//         else parent->right = newMhs;
-//     }
-// } 
+// rootMhs = insertMahasiswa(217, "iqbal", rootMhs);
+// rootMhs = insertMahasiswa(206, "haikal", rootMhs);
+// rootMhs = insertMahasiswa(205, "hafiz", rootMhs);
+// rootMhs = insertMahasiswa(204, "ryan", rootMhs);
+// rootMhs = insertMahasiswa(203, "ibnu", rootMhs);
+// rootMhs = insertMahasiswa(202, "rama", rootMhs);
+// searchMahasiswa(205, rootMhs);
+// rootMhs = deleteMahasiswa(217, rootMhs);
+// inOrder(rootMhs);
