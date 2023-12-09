@@ -1,7 +1,11 @@
 #include <iostream>
 #include <string>
+#include "TextTable.h"
+#include "json.hpp"
 
 using namespace std;
+TextTable t( '-', '|', '+' );
+using json = nlohmann::json;
 
 struct Mahasiswa{
     int npm;
@@ -13,6 +17,9 @@ struct Mahasiswa{
 
 Mahasiswa *rootMhs, *newMhs;
 int choice;
+bool isAVL = true;
+json dataMhs = json::array();
+
 
 Mahasiswa *createTree(int npm, string nama){
     newMhs = new Mahasiswa();
@@ -73,31 +80,58 @@ Mahasiswa *insertMahasiswa(int npm, string nama, Mahasiswa *curr){
     else
         curr->right = insertMahasiswa(npm, nama, curr->right);
 
-    int balanceFactor = getBalanceFactor(curr);
 
-    // rotate if  balance faktor > 1 or < -1
-    if (balanceFactor > 1 && npm < curr->left->npm)
-        return rightRotate(curr);
-    if (balanceFactor < -1 && npm > curr->right->npm)
-        return leftRotate(curr);
-    if (balanceFactor > 1 && npm > curr->left->npm){
-        curr->left = leftRotate(curr->left);
-        return rightRotate(curr);
-    }
-    if (balanceFactor < -1 && npm < curr->right->npm){
-        curr->right = rightRotate(curr->right);
-        return leftRotate(curr);
+    if (isAVL){
+        int balanceFactor = getBalanceFactor(curr);
+
+        // rotate if  balance faktor > 1 or < -1
+        if (balanceFactor > 1 && npm < curr->left->npm)
+            return rightRotate(curr);
+        if (balanceFactor < -1 && npm > curr->right->npm)
+            return leftRotate(curr);
+        if (balanceFactor > 1 && npm > curr->left->npm){
+            curr->left = leftRotate(curr->left);
+            return rightRotate(curr);
+        }
+        if (balanceFactor < -1 && npm < curr->right->npm){
+            curr->right = rightRotate(curr->right);
+            return leftRotate(curr);
+        }
     }
     return curr;
 }
 
-void inOrder(Mahasiswa *curr){
+void showAllMahasiswa(Mahasiswa *curr){
     if (curr != NULL){
-        inOrder(curr->left);
-        cout << "Nama : " << curr->nama << endl;
-        cout << "NPM : " << curr->npm << endl;
-        inOrder(curr->right);
+        showAllMahasiswa(curr->left);
+        dataMhs.push_back({curr->nama, to_string(curr->npm)});
+        showAllMahasiswa(curr->right);
     }
+}
+
+void createTable(json data){
+    TextTable t( '-', '|', '+' );
+    t.add( "No" );
+    t.add( "Nama" );
+    t.add( "NPM" );
+    t.endOfRow();
+
+    for (int i=0; i<data.size(); i++){
+        t.add( to_string(i+1) );
+        for (int j=0; j<2; j++){
+            t.add( data[i][j] );
+        }
+        t.endOfRow();
+    }
+
+    t.setAlignment( 2, TextTable::Alignment::RIGHT );
+    std::cout << t;
+}
+
+void showTableMahasiswa(Mahasiswa *curr){
+    dataMhs = json::array();
+    showAllMahasiswa(curr);
+    createTable(dataMhs);
 }
 
 Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
@@ -141,30 +175,32 @@ Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
 
     }
 
-    int balanceFactor = getBalanceFactor(curr);
 
-    // rotate
-    if (balanceFactor > 1) {
-        // left case
-        if (getBalanceFactor(curr->left) >= 0)
-            return rightRotate(curr);
+    if (isAVL){
+        int balanceFactor = getBalanceFactor(curr);
+        // rotate
+        if (balanceFactor > 1) {
+            // left case
+            if (getBalanceFactor(curr->left) >= 0)
+                return rightRotate(curr);
 
-        // left right case
-        if (getBalanceFactor(curr->left) < 0) {
-            curr->left = leftRotate(curr->left);
-            return rightRotate(curr);
+            // left right case
+            if (getBalanceFactor(curr->left) < 0) {
+                curr->left = leftRotate(curr->left);
+                return rightRotate(curr);
+            }
         }
-    }
 
-    if (balanceFactor < -1) {
-        // right case
-        if (getBalanceFactor(curr->right) <= 0)
-            return leftRotate(curr);
+        if (balanceFactor < -1) {
+            // right case
+            if (getBalanceFactor(curr->right) <= 0)
+                return leftRotate(curr);
 
-        // right left rotate
-        if (getBalanceFactor(curr->right) > 0) {
-            curr->right = rightRotate(curr->right);
-            return leftRotate(curr);
+            // right left rotate
+            if (getBalanceFactor(curr->right) > 0) {
+                curr->right = rightRotate(curr->right);
+                return leftRotate(curr);
+            }
         }
     }
 
@@ -187,6 +223,32 @@ void searchMahasiswa(int npm, Mahasiswa *curr){
     }
 }
 
+void chooseMethod(){
+    cout << endl;
+    cout << "Silahkan Pilih Metode" << endl;
+    cout << "1. BINARY SEARCH TREE" << endl;
+    cout << "2. AVL TREE" << endl;
+    cout << "3. Keluar Aplikasi" << endl;
+    cout << "Pilih menu (sesuai nomor di atas) : ";
+    cin >> choice;
+    switch (choice)
+    {
+    case 1:
+        isAVL = false;
+        break;
+    case 2:
+        isAVL = true;
+        break;
+    case 3:
+        exit(0);
+        break;
+    default:
+        cout << "Menu pilihan tidak tersedia" << endl;
+        break;
+    }
+    cout << endl;
+}
+
 void displayMenu(){
     cout << endl;
     cout << "Sistem Pendaftaran Mahasiswa" << endl;
@@ -194,24 +256,54 @@ void displayMenu(){
     cout << "2. Lihat daftar mahasiswa" << endl;
     cout << "3. Cari Mahasiswa" << endl;
     cout << "4. Hapus Data Mahasiwa" << endl;
+    cout << "5. Ganti Metode" << endl;
+    cout << "6. Keluar Aplikasi" << endl;
     cout << "Pilih menu (sesuai nomor di atas) : ";
     cin >> choice;
     cout << endl;
 }
 
 void displayTitle(){
-    cout << "   _________   ____.____      ___________________________________________" << endl;
-    cout << "  /  _  \\   \\ /   /|    |     \\__    ___/\\______   \\_   _____/\\_   _____/" << endl;
-    cout << " /  /_\\  \\   Y   / |    |       |    |    |       _/|    __)_  |    __)_ " << endl;
-    cout << "/    |    \\     /  |    |___    |    |    |    |   \\|        \\ |        \\" << endl;
-    cout << "\\____|__  /\\___/   |_______ \\   |____|    |____|_  /_______  //_______  /" << endl;
-    cout << "        \\/                 \\/                    \\/        \\/         \\/ " << endl;
-    cout << endl;
+    if (isAVL){
+        cout << "   _________   ____.____      ___________________________________________" << endl;
+        cout << "  /  _  \\   \\ /   /|    |     \\__    ___/\\______   \\_   _____/\\_   _____/" << endl;
+        cout << " /  /_\\  \\   Y   / |    |       |    |    |       _/|    __)_  |    __)_ " << endl;
+        cout << "/    |    \\     /  |    |___    |    |    |    |   \\|        \\ |        \\" << endl;
+        cout << "\\____|__  /\\___/   |_______ \\   |____|    |____|_  /_______  //_______  /" << endl;
+        cout << "        \\/                 \\/                    \\/        \\/         \\/ " << endl;
+        cout << endl;
+    }else{
+        cout << " ___ _                      ___                 _      _____             "<< endl;
+        cout << "| _ (_)_ _  __ _ _ _ _  _  / __|___ __ _ _ _ __| |_   |_   __ _ ___ ___  "<< endl;
+        cout << "| _ | | ' \\/ _` | '_| || | \\__ / -_/ _` | '_/ _| ' \\    | || '_/ -_/ -_) "<< endl;
+        cout << "|___|_|_||_\\__,_|_|  \\_, | |___\\___\\__,_|_| \\__|_||_|   |_||_| \\___\\___| "<< endl;
+        cout << "                     |__/                                                "<< endl;
+        cout << endl;
+
+    }
 }
 
+
+
 int main(){
+    // commmand execute
+    // g++ finalProject.cpp -o finalProject && .\finalProject
     string nama;
     int npm;
+
+    chooseMethod: // label for choose the method
+    chooseMethod();
+    rootMhs = insertMahasiswa(217, "iqbal", rootMhs);
+    rootMhs = insertMahasiswa(231, "hafiz", rootMhs);
+    rootMhs = insertMahasiswa(167, "naufaldy", rootMhs);
+    rootMhs = insertMahasiswa(101, "haikal", rootMhs);
+    rootMhs = insertMahasiswa(131, "jabbar", rootMhs);
+    rootMhs = insertMahasiswa(105, "ryan", rootMhs);
+    rootMhs = insertMahasiswa(189, "alex", rootMhs);
+    rootMhs = insertMahasiswa(215, "ibnu", rootMhs);
+    rootMhs = insertMahasiswa(134, "hendri", rootMhs);
+    rootMhs = insertMahasiswa(230, "sultan", rootMhs);
+    showTableMahasiswa(rootMhs);
 
     displayTitle();
     displayMenu();
@@ -231,7 +323,7 @@ int main(){
                 break;
             case 2:
                 cout << "Daftar semua mahasiswa" << endl;
-                inOrder(rootMhs);
+                showTableMahasiswa(rootMhs);
                 break;
             case 3:
                 cout << "Masukkan NPM \t: ";
@@ -243,6 +335,12 @@ int main(){
                 cin >> npm;
                 rootMhs = deleteMahasiswa(npm, rootMhs);
                 break;
+            case 5:
+                goto chooseMethod;
+                break;
+            case 6:
+                exit(0);
+                break;
             default:
                 cout << "Menu pilihan tidak tersedia" << endl;
                 break;
@@ -251,16 +349,4 @@ int main(){
         displayMenu();
     } 
     return 0;
-    // commmand execute
-    // g++ finalProject.cpp -o finalProject && .\finalProject
 }
-
-// rootMhs = insertMahasiswa(217, "iqbal", rootMhs);
-// rootMhs = insertMahasiswa(206, "haikal", rootMhs);
-// rootMhs = insertMahasiswa(205, "hafiz", rootMhs);
-// rootMhs = insertMahasiswa(204, "ryan", rootMhs);
-// rootMhs = insertMahasiswa(203, "ibnu", rootMhs);
-// rootMhs = insertMahasiswa(202, "rama", rootMhs);
-// searchMahasiswa(205, rootMhs);
-// rootMhs = deleteMahasiswa(217, rootMhs);
-// inOrder(rootMhs);
