@@ -124,6 +124,7 @@ int main(){
     // preOrder(root);
     // inOrder(temp1);
     // cout << temp1->right->value;
+    // command execute
     // g++ binaryTree.cpp -o binaryTree && .\binaryTree
     return 0;
 }
