@@ -6,20 +6,24 @@ using namespace std;
 struct Mahasiswa{
     string nama;
     string npm;
-    Mahasiswa *next;
+    Mahasiswa *next=NULL;
 };
 
 Mahasiswa *head = NULL, *tail, *temp, *curr, *mhs;
 int choose = 0;
 
-void insertMahasiswa(){
-    string nama, npm;
-    cout << "Masukkan Nama : " ;
-    cin.get();
-    getline(cin, nama);
+void insertMahasiswa(string newNama = "", string newNPM = ""){
+    string nama = newNama;
+    string npm = newNPM;
 
-    cout << "Masukkan NPM : " ;
-    getline(cin, npm);
+    if (nama == "" || npm == ""){
+        cout << "Masukkan Nama : " ;
+        cin.get();
+        getline(cin, nama);
+
+        cout << "Masukkan NPM : " ;
+        getline(cin, npm);
+    }
 
     if(head == NULL){
         // insert first
@@ -145,8 +149,26 @@ void showMenu(){
 }
 
 int main(){
+    //! execute command
+    //! g++ circular.cpp -o circular && .\circular
+
+    Mahasiswa mhs[5] = {
+        {"iqbal", "217"}, 
+        {"hafiz", "031"}, 
+        {"haikal", "155"}, 
+        {"ibnu", "166"}, 
+        {"ryan","210"}
+    };
+
+    for(int i=0; i<5; i++)
+        insertMahasiswa(mhs[i].nama, mhs[i].npm);
+
+    system("CLS");
+    getAllMahasiswa();
+
     showMenu();
     while(choose != 0){
+        system("CLS");
         switch (choose)
         {
             case 1:
@@ -167,31 +189,6 @@ int main(){
         }
         showMenu();
     }
-
-    // struct Mhs
-    // {
-    //     string nama;
-    //     string npm;
-    // };
-
-    // Mhs mahasiswa[5] = {{"iqbal", "217"}, {"hafiz", "031"}, {"haikal", "055"}, {"ganes", "066"}, {"ryan","077"}};
-    
-    // for(int i=0; i<5; i++){
-    //     insertMahasiswa(mahasiswa[i].nama, mahasiswa[i].npm);
-    // }
-
-    // getAllMahasiswa();
-    // removeMahasiswa(mahasiswa[2].npm);
-    // getAllMahasiswa();
-    // removeMahasiswa(mahasiswa[1].npm);
-    // getAllMahasiswa();
-    // removeMahasiswa(mahasiswa[4].npm);
-    // getAllMahasiswa();
-    // removeMahasiswa(mahasiswa[0].npm);
-    // getAllMahasiswa();
-
-    // execute command
-    // g++ circular.cpp -o circular && .\circular
 
     return 0;
 }
