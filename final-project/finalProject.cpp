@@ -2,6 +2,7 @@
 #include <string>
 #include "TextTable.h"
 #include "json.hpp"
+#include <fstream>
 
 using namespace std;
 TextTable t( '-', '|', '+' );
@@ -19,19 +20,49 @@ Mahasiswa *rootMhs, *newMhs;
 int choice;
 bool isAVL = true;
 json dataMhs = json::array();
+json dataShow = json::array();
 
+bool checkMhs(int npm, Mahasiswa *curr){
+    if (curr == NULL)
+        return false;
+    else{
+        if (npm < curr->npm)
+            return checkMhs(npm, curr->left);
+        else if (npm > curr->npm)
+            return checkMhs(npm, curr->right);
+        else
+            return true;
+    }
+}
 
 Mahasiswa *createTree(int npm, string nama){
-    newMhs = new Mahasiswa();
-    newMhs->nama = nama;
-    newMhs->npm = npm;
-    newMhs->left = NULL;
-    newMhs->right = NULL;
-    if (rootMhs == NULL) rootMhs = newMhs;
+    bool duplicateData = false;
+    json mhs = {{"npm", npm}, {"nama", nama}};
+    for (int i=0; i<dataMhs.size(); i++){
+        // save new data mhs if not exist in dataMhs arr
+        if (dataMhs[i]["npm"] == npm){
+            duplicateData = true;
+            break;
+        }
+    }
 
-    cout << "Data mahasiswa dengan NPM " << newMhs->npm << " Berhasil ditambahkan" << endl;
+    if (!duplicateData){
+        dataMhs.push_back(mhs);
+        ofstream o("allMahasiswa.json");
+        o << setw(4) << dataMhs << endl;
+    }
 
-    return newMhs;
+    if (!checkMhs(npm, rootMhs)){
+        newMhs = new Mahasiswa();
+        newMhs->nama = nama;
+        newMhs->npm = npm;
+        newMhs->left = NULL;
+        newMhs->right = NULL;
+        if (rootMhs == NULL) rootMhs = newMhs;    
+        cout << "Data mahasiswa dengan NPM " << newMhs->npm << " Berhasil ditambahkan" << endl;
+        return newMhs;
+    }
+    return NULL;
 }
 
 int maxValue(int a, int b){
@@ -71,10 +102,25 @@ int getBalanceFactor(Mahasiswa *curr){
     return heightRoot(curr->left) - heightRoot(curr->right);
 }
 
+void searchMahasiswa(int npm, Mahasiswa *curr){
+    if (curr == NULL)
+        cout << "Data Mahasiswa Tidak Ditemukan" << endl;
+    else{
+        if (npm < curr->npm)
+            searchMahasiswa(npm, curr->left);
+        else if (npm > curr->npm)
+            searchMahasiswa(npm, curr->right);
+        else{
+            cout << "Data Mahasiswa" << endl;
+            cout << "Nama : " << curr->nama << endl;
+            cout << "NPM : " << curr->npm << endl;
+        }
+    }
+}
+
 Mahasiswa *insertMahasiswa(int npm, string nama, Mahasiswa *curr){
     if (curr == NULL)
-       return createTree(npm, nama);
-
+        return createTree(npm, nama);
     if (npm < curr->npm)            
         curr->left = insertMahasiswa(npm, nama, curr->left);
     else
@@ -101,10 +147,24 @@ Mahasiswa *insertMahasiswa(int npm, string nama, Mahasiswa *curr){
     return curr;
 }
 
+void loadData(){
+    ifstream mhsFile;
+    mhsFile.open("allMahasiswa.json");
+
+    // load data if file exist
+    if (mhsFile){
+        json allData = json::parse(mhsFile);
+        dataMhs = allData;
+        for (int i=0; i<dataMhs.size(); i++){
+            rootMhs = insertMahasiswa(dataMhs[i]["npm"], dataMhs[i]["nama"], rootMhs);
+        }
+    }
+}
+
 void showAllMahasiswa(Mahasiswa *curr){
     if (curr != NULL){
         showAllMahasiswa(curr->left);
-        dataMhs.push_back({curr->nama, to_string(curr->npm)});
+        dataShow.push_back({curr->nama, to_string(curr->npm)});
         showAllMahasiswa(curr->right);
     }
 }
@@ -129,9 +189,19 @@ void createTable(json data){
 }
 
 void showTableMahasiswa(Mahasiswa *curr){
-    dataMhs = json::array();
+    dataShow = json::array();
     showAllMahasiswa(curr);
-    createTable(dataMhs);
+    createTable(dataShow);
+}
+
+void removeData(int npm){
+    for (int i=0; i<dataMhs.size(); i++){
+        if (dataMhs[i]["npm"] == npm){
+            dataMhs.erase(i);
+        }
+    }
+    ofstream o("allMahasiswa.json");
+    o << setw(4) << dataMhs << endl;
 }
 
 Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
@@ -148,18 +218,21 @@ Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
         // remove leaf node
         if (curr->left == NULL && curr->right == NULL) {
             cout << "Mahasiswa dengan NPM " << curr->npm << " Berhasil dihapus" << endl;
+            removeData(npm);
             delete curr;
             return NULL;
         }
         if (curr->left == NULL) {
             Mahasiswa* childMhs = curr->right;
             cout << "Mahasiswa dengan NPM " << curr->npm << " Berhasil dihapus" << endl;
+            removeData(npm);
             delete curr;
             return childMhs;
         }
         else if (curr->right == NULL) {
             Mahasiswa* childMhs = curr->left;
             cout << "Mahasiswa dengan NPM " << curr->npm << " Berhasil dihapus" << endl;
+            removeData(npm);
             delete curr;
             return childMhs;
         }
@@ -205,22 +278,6 @@ Mahasiswa* deleteMahasiswa(int npm, Mahasiswa* curr) {
     }
 
     return curr;
-}
-
-void searchMahasiswa(int npm, Mahasiswa *curr){
-    if (curr == NULL)
-        cout << "Data Mahasiswa Tidak Ditemukan" << endl;
-    else{
-        if (npm < curr->npm)
-            searchMahasiswa(npm, curr->left);
-        else if (npm > curr->npm)
-            searchMahasiswa(npm, curr->right);
-        else{
-            cout << "Data Mahasiswa" << endl;
-            cout << "Nama : " << curr->nama << endl;
-            cout << "NPM : " << curr->npm << endl;
-        }
-    }
 }
 
 void chooseMethod(){
@@ -283,15 +340,27 @@ void displayTitle(){
     }
 }
 
-
-
 int main(){
-    // commmand execute
-    // g++ finalProject.cpp -o finalProject && .\finalProject
+    //! commmand execute
+    //! g++ finalProject.cpp -o finalProject && .\finalProject
+
+    //! testing
+    // loadData();
+    // rootMhs = insertMahasiswa(217, "iqbal", rootMhs);
+    // rootMhs = insertMahasiswa(231, "hafiz", rootMhs);
+    // rootMhs = insertMahasiswa(167, "naufaldy", rootMhs);
+    // rootMhs = insertMahasiswa(101, "haikal", rootMhs);
+    // rootMhs = insertMahasiswa(131, "jabbar", rootMhs);
+    // showTableMahasiswa(rootMhs);
+
+
+    //! production 
+    system("CLS");
+    chooseMethod: // label for choose the method
+    loadData();
     string nama;
     int npm;
 
-    chooseMethod: // label for choose the method
     chooseMethod();
     rootMhs = insertMahasiswa(217, "iqbal", rootMhs);
     rootMhs = insertMahasiswa(231, "hafiz", rootMhs);
@@ -310,6 +379,7 @@ int main(){
 
     while (choice != 0)
     {
+        system("CLS");
         switch (choice)
         {
             case 1:
